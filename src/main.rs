@@ -1,4 +1,4 @@
-use anyhow::{bail, Result};
+use anyhow::{Result, bail};
 use clap::Parser;
 use hound::{SampleFormat, WavReader};
 use std::path::PathBuf;

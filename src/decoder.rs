@@ -1,8 +1,8 @@
-use anyhow::{bail, Result};
+use anyhow::{Result, bail};
 use rubato::{
     Resampler, SincFixedIn, SincInterpolationParameters, SincInterpolationType, WindowFunction,
 };
-use rustfft::{num_complex::Complex, FftPlanner};
+use rustfft::{FftPlanner, num_complex::Complex};
 use std::collections::VecDeque;
 use std::io::Write;
 // --- DSP Constants ---
@@ -552,8 +552,8 @@ fn trace_signal(signal: &[f32], threshold: f32, wpm: f32) -> std::io::Result<()>
         let bar_len = (val / max_val * 100.0).round() as usize;
         let thresh_pos = (threshold / max_val * 100.0).round() as usize;
         let mut line = vec![' '; 101];
-        for i in 0..bar_len.min(100) {
-            line[i] = '#';
+        for item in line.iter_mut().take(bar_len.min(100)) {
+            *item = '#';
         }
         if thresh_pos <= 100 {
             line[thresh_pos] = '|';

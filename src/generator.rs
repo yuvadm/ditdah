@@ -187,7 +187,7 @@ mod tests {
         let generator = MorseGenerator::new(12000, 600.0, 20.0);
         let result = generator.generate_wav_file("SOS", "test_sos.wav");
         assert!(result.is_ok());
-        
+
         // Clean up test file
         std::fs::remove_file("test_sos.wav").ok();
     }

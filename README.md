@@ -1,5 +1,8 @@
 # ditdah - Morse Code Decoder
 
+[![CI](https://github.com/yuvadm/ditdah/workflows/CI/badge.svg)](https://github.com/yuvadm/ditdah/actions)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 A high-performance Rust implementation of a Morse code decoder that can process WAV audio files and decode them into text with **100% accuracy** on the comprehensive test suite.
 
 ## Features
