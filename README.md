@@ -74,7 +74,11 @@ cargo test
 ### Baseline Tests (Quick Verification)
 
 ```bash
+# Basic test
 cargo test baseline_decoder_test -- --nocapture
+
+# With debug output
+RUST_LOG=info cargo test baseline_decoder_test -- --nocapture
 ```
 
 ### Comprehensive Test Suite

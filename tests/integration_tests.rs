@@ -339,20 +339,20 @@ fn baseline_decoder_test() -> Result<()> {
     // Clean baseline test to establish current decoder status
     println!("=== DECODER BASELINE TEST ===");
 
-    std::env::set_var("RUST_LOG", "info");
+    // Note: Set RUST_LOG=info environment variable to see decoder output during testing
     env_logger::try_init().ok();
 
     let generator = MorseGenerator::new(12000, 600.0, 20.0);
 
     let test_cases = [
         ("EEEE", "4 dots"),
-        ("TTTT", "4 dashes"), 
+        ("TTTT", "4 dashes"),
         ("ETET", "dot-dash-dot-dash"),
     ];
 
     for (i, (test_text, description)) in test_cases.iter().enumerate() {
         println!("\n--- Test {}: {} ({}) ---", i + 1, test_text, description);
-        
+
         let temp_file = format!("baseline_test_{}.wav", i);
         generator.generate_wav_file(test_text, &temp_file)?;
         let decoded = decode_wav_file(&temp_file)?;
@@ -362,7 +362,7 @@ fn baseline_decoder_test() -> Result<()> {
             decoded,
             decoded == *test_text
         );
-        
+
         // Clean up immediately
         std::fs::remove_file(&temp_file).ok();
     }
