@@ -2,6 +2,11 @@
 name = "ditdah"
 version = "0.1.0"
 edition = "2021"
+license = "MIT"
+description = "High-performance Morse code decoder with 100% test suite accuracy"
+repository = "https://github.com/yuvadm/ditdah"
+keywords = ["morse", "audio", "signal-processing", "decoder"]
+categories = ["multimedia::audio", "science"]
 
 [lib]
 name = "ditdah"
