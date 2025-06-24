@@ -63,7 +63,7 @@ fn main() -> Result<()> {
     for chunk in mono_samples.chunks(CHUNK_SIZE) {
         decoder.process(chunk)?;
     }
-    
+
     // Finalize decoding after all audio is processed
     let decoded_text = decoder.finalize()?;
 
