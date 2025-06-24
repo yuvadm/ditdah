@@ -136,8 +136,7 @@ fn generate_wav_file(cli: &Cli, text: &str) -> Result<()> {
 
     let output_path = cli
         .output
-        .as_ref()
-        .map(|p| p.clone())
+        .clone()
         .unwrap_or_else(|| PathBuf::from("output.wav"));
 
     if cli.verbose {
