@@ -2,13 +2,9 @@
 // Comprehensive integration tests for the Morse decoder
 
 use anyhow::Result;
-use ditdah::{MorseDecoder, MorseGenerator};
-use hound::{SampleFormat, WavReader};
-use std::fs;
-use std::io::Write;
+use ditdah::{decode_wav_file, MorseGenerator};
+use std::{fs, io::Write};
 
-const TARGET_SAMPLE_RATE: u32 = 12000;
-const CHUNK_SIZE: usize = 4096;
 
 #[derive(Debug)]
 struct TestCase {
@@ -225,7 +221,7 @@ fn run_single_test(test_case: &TestCase) -> Result<TestResult> {
     generator.generate_wav_file(test_case.text, &wav_path)?;
 
     // Decode the WAV file
-    let decoded_text = decode_wav_file(&wav_path)?;
+    let decoded_text = decode_test_wav_file(&wav_path)?;
 
     // Calculate accuracy
     let accuracy = calculate_accuracy(test_case.text, &decoded_text);
@@ -250,47 +246,8 @@ fn run_single_test(test_case: &TestCase) -> Result<TestResult> {
     }
 }
 
-fn decode_wav_file(path: &str) -> Result<String> {
-    let mut reader = WavReader::open(path)?;
-    let spec = reader.spec();
-
-    if spec.sample_format != SampleFormat::Int && spec.sample_format != SampleFormat::Float {
-        return Err(anyhow::anyhow!(
-            "Unsupported sample format: {:?}",
-            spec.sample_format
-        ));
-    }
-
-    // Create decoder
-    let mut decoder = MorseDecoder::new(spec.sample_rate, TARGET_SAMPLE_RATE)?;
-
-    // Read and process audio
-    let samples_f32: Vec<f32> = if spec.sample_format == SampleFormat::Int {
-        reader
-            .samples::<i16>()
-            .map(|s| s.unwrap() as f32 / 32768.0)
-            .collect()
-    } else {
-        reader.samples::<f32>().map(|s| s.unwrap()).collect()
-    };
-
-    // Convert to mono if necessary
-    let mono_samples: Vec<f32> = if spec.channels > 1 {
-        samples_f32
-            .chunks_exact(spec.channels as usize)
-            .map(|chunk| chunk.iter().sum::<f32>() / spec.channels as f32)
-            .collect()
-    } else {
-        samples_f32
-    };
-
-    // Process in chunks
-    for chunk in mono_samples.chunks(CHUNK_SIZE) {
-        decoder.process(chunk)?;
-    }
-
-    // Finalize and get result
-    decoder.finalize()
+fn decode_test_wav_file(path: &str) -> Result<String> {
+    decode_wav_file(path)
 }
 
 fn calculate_accuracy(expected: &str, actual: &str) -> f32 {
@@ -355,7 +312,7 @@ fn baseline_decoder_test() -> Result<()> {
 
         let temp_file = format!("baseline_test_{}.wav", i);
         generator.generate_wav_file(test_text, &temp_file)?;
-        let decoded = decode_wav_file(&temp_file)?;
+        let decoded = decode_test_wav_file(&temp_file)?;
         println!(
             "Expected: {} | Decoded: {} | Success: {}",
             test_text,
