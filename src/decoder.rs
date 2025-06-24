@@ -3,15 +3,15 @@
 // a Goertzel filter for tone extraction, and the core decoding logic.
 
 use anyhow::{Result, bail};
-use collections::VecDeque;
-use rubato::{InterpolationParameters, InterpolationType, Resampler, SincFixedIn, WindowFunction};
-use rustfft::{Fft, FftPlanner, num_complex::Complex};
-use std::sync::Arc;
+use rubato::{
+    Resampler, SincFixedIn, SincInterpolationParameters, SincInterpolationType, WindowFunction,
+};
+use rustfft::{FftPlanner, num_complex::Complex};
+use std::collections::VecDeque;
 
 // --- DSP Constants (ported from ggmorse) ---
 const FREQ_MIN_HZ: f32 = 200.0;
 const FREQ_MAX_HZ: f32 = 1200.0;
-const HISTORY_S: f32 = 3.0; // How many seconds of audio to keep for analysis
 
 // --- Biquad Filter (Corrected Implementation) ---
 #[derive(Debug, Clone, Copy)]
@@ -156,10 +156,10 @@ pub struct MorseDecoder {
 impl MorseDecoder {
     pub fn new(source_sample_rate: u32, target_sample_rate: u32) -> Result<Self> {
         let resampler = if source_sample_rate != target_sample_rate {
-            let params = InterpolationParameters {
+            let params = SincInterpolationParameters {
                 sinc_len: 256,
                 f_cutoff: 0.95,
-                interpolation: InterpolationType::Linear,
+                interpolation: SincInterpolationType::Linear,
                 oversampling_factor: 256,
                 window: WindowFunction::BlackmanHarris,
             };
@@ -175,9 +175,12 @@ impl MorseDecoder {
             SincFixedIn::new(
                 1.0,
                 1.0,
-                InterpolationParameters {
+                SincInterpolationParameters {
                     sinc_len: 2,
-                    ..Default::default()
+                    f_cutoff: 0.95,
+                    interpolation: SincInterpolationType::Linear,
+                    oversampling_factor: 256,
+                    window: WindowFunction::BlackmanHarris,
                 },
                 1024,
                 1,
