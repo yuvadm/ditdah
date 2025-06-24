@@ -245,7 +245,6 @@ impl MorseDecoder {
     }
 
     // --- The complex analysis functions below are unchanged ---
-
     fn detect_pitch_stft(&self) -> Result<f32> {
         let fft_size = 4096;
         let step_size = fft_size / 4;

@@ -2,9 +2,8 @@
 // Comprehensive integration tests for the Morse decoder
 
 use anyhow::Result;
-use ditdah::{decode_wav_file, MorseGenerator};
+use ditdah::{MorseGenerator, decode_wav_file};
 use std::{fs, io::Write};
-
 
 #[derive(Debug)]
 struct TestCase {

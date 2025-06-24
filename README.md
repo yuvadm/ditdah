@@ -8,6 +8,8 @@ A high-performance Rust implementation of a Morse code decoder that can process 
 ## Features
 
 - **High Accuracy**: Achieves 100% pass rate on comprehensive test suite
+- **Clean Library API**: High-level functions for easy integration (`decode_wav_file`, `decode_samples`)
+- **Full-Featured CLI**: Decode files, generate test audio, verbose output, timing information
 - **Audio Processing**: Supports WAV files with various sample rates (12kHz, 44.1kHz) and formats
 - **Signal Processing**: Uses FFT-based pitch detection, Goertzel filtering, and adaptive threshold detection
 - **Self-Calibrating**: Automatically determines timing, WPM, and optimal thresholds
@@ -37,33 +39,45 @@ cargo build --release
 
 ### Command Line Interface
 
-Decode a WAV file containing Morse code:
-
+**Decode a WAV file:**
 ```bash
 cargo run -- input.wav
 ```
 
-With debug output:
+**With verbose output and timing:**
+```bash
+cargo run -- input.wav --verbose --time
+```
+
+**Generate test Morse code WAV files:**
+```bash
+cargo run -- --generate "SOS" --verbose
+cargo run -- --generate "HELLO WORLD" --output test.wav --frequency 800 --wpm 25
+```
+
+**With debug logging:**
 ```bash
 RUST_LOG=info cargo run -- input.wav
 ```
 
 ### Library Usage
 
+**High-level API (recommended):**
 ```rust
-use ditdah::{MorseDecoder, MorseGenerator};
+use ditdah::{decode_wav_file, decode_samples, MorseGenerator};
 
-// Create a decoder
-let mut decoder = MorseDecoder::new(44100, 12000)?; // source_rate, target_rate
-
-// Process audio chunks
-for chunk in audio_chunks {
-    decoder.process(&chunk)?;
-}
-
-// Get decoded text
-let decoded_text = decoder.finalize()?;
+// Decode a WAV file directly
+let decoded_text = decode_wav_file("morse.wav")?;
 println!("Decoded: {}", decoded_text);
+
+// Decode audio samples directly
+let samples: Vec<f32> = /* your audio data */;
+let decoded_text = decode_samples(&samples, 12000)?;
+println!("Decoded: {}", decoded_text);
+
+// Generate Morse code WAV files
+let generator = MorseGenerator::new(12000, 600.0, 20.0);
+generator.generate_wav_file("SOS", "output.wav")?;
 ```
 
 ## Testing
@@ -113,17 +127,21 @@ The decoder uses a sophisticated multi-stage approach:
 - **Adaptive gap detection**: Distinguishes element gaps, letter gaps, and word gaps
 - **Robust parameter estimation**: Works across different speeds and frequencies
 
-## Configuration
+## Library API
 
-Key constants in `src/decoder.rs`:
+The library provides a clean, high-level API:
 
 ```rust
-const FREQ_MIN_HZ: f32 = 200.0;             // Minimum frequency to detect
-const FREQ_MAX_HZ: f32 = 1200.0;            // Maximum frequency to detect  
-const DIT_DAH_BOUNDARY: f32 = 2.0;          // Threshold between dots and dashes
-const LETTER_SPACE_BOUNDARY: f32 = 2.0;     // Threshold to end current letter
-const WORD_SPACE_BOUNDARY: f32 = 5.0;       // Threshold to add word space
+pub fn decode_wav_file<P: AsRef<std::path::Path>>(path: P) -> Result<String>
+pub fn decode_samples(samples: &[f32], sample_rate: u32) -> Result<String>
+pub use generator::MorseGenerator;
 ```
+
+**All signal processing complexity is handled internally** - the library automatically:
+- Detects audio format and converts to the required sample rate
+- Performs frequency analysis and filtering  
+- Calibrates timing parameters
+- Decodes Morse patterns to text
 
 ## Project Structure
 
@@ -131,12 +149,13 @@ const WORD_SPACE_BOUNDARY: f32 = 5.0;       // Threshold to add word space
 ditdah/
 ├── src/
 │   ├── main.rs          # CLI application
-│   ├── lib.rs           # Library interface  
-│   ├── decoder.rs       # Core Morse decoder logic
-│   └── generator.rs     # Morse code generator (for testing)
+│   ├── lib.rs           # Public library API
+│   ├── decoder.rs       # Internal Morse decoder implementation
+│   └── generator.rs     # Public Morse code generator
 ├── tests/
 │   └── integration_tests.rs  # Comprehensive test suite
-├── Cargo.toml           # Project configuration
+├── .github/workflows/   # CI pipeline
+├── Cargo.toml           # Rust 2024 edition project configuration
 ├── LICENSE              # MIT License
 └── README.md           # This file
 ```
