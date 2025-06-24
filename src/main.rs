@@ -4,7 +4,9 @@ use hound::{SampleFormat, WavReader};
 use std::path::PathBuf;
 
 mod decoder;
+mod generator;
 use decoder::MorseDecoder;
+pub use generator::MorseGenerator;
 
 const TARGET_SAMPLE_RATE: u32 = 12000; // Same as ggmorse's kBaseSampleRate
 const CHUNK_SIZE: usize = 4096;

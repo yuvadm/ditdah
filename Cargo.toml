@@ -1,7 +1,15 @@
 [package]
 name = "ditdah"
 version = "0.1.0"
-edition = "2024"
+edition = "2021"
+
+[lib]
+name = "ditdah"
+path = "src/lib.rs"
+
+[[bin]]
+name = "ditdah"
+path = "src/main.rs"
 
 [dependencies]
 anyhow = "1.0.98"
@@ -11,3 +19,6 @@ hound = "3.5.1"
 log = "0.4.27"
 rubato = "0.16.2"
 rustfft = "6.4.0"
+
+[dev-dependencies]
+tempfile = "3.8"
